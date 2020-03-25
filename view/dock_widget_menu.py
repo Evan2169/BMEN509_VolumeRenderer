@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (
-    QDialog, QDockWidget, QFileDialog, QGroupBox, QHBoxLayout, QLabel, QPushButton, QSlider, QVBoxLayout, QWidget
+    QColorDialog, QDialog, QDockWidget, QFileDialog, QGroupBox, QHBoxLayout, QLabel, QPushButton, QSlider, QVBoxLayout, QWidget
 )
 from PyQt5.QtCore import QDir, Qt
 import vtk
@@ -16,13 +16,15 @@ class DockWidgetMenu(QDockWidget):
 
         self.render_data_service = render_data_service
 
+
+
     def __setupInternalContents(self):
         layout = QVBoxLayout()
         widget = QWidget(self)
 
         self.__create_file_selection_view(layout, widget)
         self.__create_skin_opacity_view(layout, widget)
-        self.__gaussian_filter(layout, widget)
+        self.__volume_color(layout, widget)
 
         widget.setLayout(layout)
         self.setWidget(widget)
@@ -49,7 +51,7 @@ class DockWidgetMenu(QDockWidget):
             def open_single_file(dialog, data_type):
                 file, _ = QFileDialog.getOpenFileName(parent, directory = QDir.currentPath())
                 set_filename_and_close_dialog(file, dialog, data_type)
-                
+
             def open_directory(dialog, data_type):
                 directory = QFileDialog.getExistingDirectory(parent, directory = QDir.currentPath())
                 set_filename_and_close_dialog(directory, dialog, data_type)
@@ -85,38 +87,27 @@ class DockWidgetMenu(QDockWidget):
 
         skin_opacity_slider.valueChanged.connect(change_skin_opacity)
 
-    def __gaussian_filter(self, layout, parent):
+    def __volume_color(self, layout, parent):
 
-        gaussian_groupbox = QGroupBox("Gaussian Filter", parent)
-        gaussian_radius_label = QLabel("Radius Factor", gaussian_groupbox)
-        gaussian_radius_slider = QSlider(Qt.Horizontal)
-        gaussian_radius_slider.setMinimum(0)
-        gaussian_radius_slider.setMaximum(2000)
-        gaussian_radius_slider.setValue(1000)
+        volume_color_groupbox = QGroupBox("Color Parameters", parent)
+        skin_color_button = QPushButton("Pick Skin Color", volume_color_groupbox)
+        skin_color_button.clicked.connect(self.color_picker_skin)
+        bone_color_button = QPushButton("Pick Bone Color", volume_color_groupbox)
+        bone_color_button.clicked.connect(self.color_picker_bone)
 
-        gaussian_std_label = QLabel("Standard Dev.", gaussian_groupbox)
-        gaussian_std_slider = QSlider(Qt.Horizontal)
-        gaussian_std_slider.setMinimum(0)
-        gaussian_std_slider.setMaximum(2000)
-        gaussian_std_slider.setValue(1000)
+        volume_color_layout = QVBoxLayout()
+        volume_color_layout.addWidget(skin_color_button)
+        volume_color_layout.addWidget(bone_color_button)
 
-        gaussian_layout = QHBoxLayout()
-        gaussian_layout.addWidget(gaussian_radius_label)
-        gaussian_layout.addWidget(gaussian_radius_slider)
+        volume_color_groupbox.setLayout(volume_color_layout)
+        layout.addWidget(volume_color_groupbox)
 
-        gaussian_layout.addWidget(gaussian_std_label)
-        gaussian_layout.addWidget(gaussian_std_slider)
+    def color_picker_skin(self):
+        color = QColorDialog.getColor()
+        color = color.getRgb()
+        self.render_data_service.set_skin_color(color)
 
-        gaussian_groupbox.setLayout(gaussian_layout)
-        layout.addWidget(gaussian_groupbox)
-
-        '''
-        gaussian = vtk.vtkImageGaussianSmooth()
-        gaussian.SetStandardDeviation(2)
-        gaussian.SetDimensionality(3)
-        gaussian.SetRadiusFactor(1)
-        gaussian.SetInput(imageIn.GetOutput())
-        gaussian.Update()
-        '''
-        #vtkImageGaussianSmooth
-        #vtkImageMedian3D
+    def color_picker_bone(self):
+        color = QColorDialog.getColor()
+        color = color.getRgb()
+        self.render_data_service.set_bone_color(color)
