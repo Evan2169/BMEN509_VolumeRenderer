@@ -1,5 +1,8 @@
 from PyQt5.QtWidgets import (
-    QColorDialog, QDialog, QDockWidget, QFileDialog, QGroupBox, QHBoxLayout, QLabel, QPushButton, QSlider, QVBoxLayout, QWidget
+    QColorDialog, QDialog, QDockWidget, 
+    QFileDialog, QGroupBox, QHBoxLayout, 
+    QLabel, QPushButton, QSlider, 
+    QVBoxLayout, QWidget
 )
 from PyQt5.QtCore import QDir, Qt
 import vtk
@@ -24,7 +27,7 @@ class DockWidgetMenu(QDockWidget):
 
         self.__create_file_selection_view(layout, widget)
         self.__create_skin_opacity_view(layout, widget)
-        self.__volume_color(layout, widget)
+        self.__create_volume_color_view(layout, widget)
 
         widget.setLayout(layout)
         self.setWidget(widget)
@@ -87,13 +90,22 @@ class DockWidgetMenu(QDockWidget):
 
         skin_opacity_slider.valueChanged.connect(change_skin_opacity)
 
-    def __volume_color(self, layout, parent):
+    def __create_volume_color_view(self, layout, parent):
+        def color_picker_skin(self):
+            color = QColorDialog.getColor()
+            color = color.getRgb()
+            self.render_data_service.set_skin_color(color)
+
+        def color_picker_bone(self):
+            color = QColorDialog.getColor()
+            color = color.getRgb()
+            self.render_data_service.set_bone_color(color)
 
         volume_color_groupbox = QGroupBox("Color Parameters", parent)
         skin_color_button = QPushButton("Pick Skin Color", volume_color_groupbox)
-        skin_color_button.clicked.connect(self.color_picker_skin)
+        skin_color_button.clicked.connect(color_picker_skin)
         bone_color_button = QPushButton("Pick Bone Color", volume_color_groupbox)
-        bone_color_button.clicked.connect(self.color_picker_bone)
+        bone_color_button.clicked.connect(color_picker_bone)
 
         volume_color_layout = QVBoxLayout()
         volume_color_layout.addWidget(skin_color_button)
@@ -102,12 +114,3 @@ class DockWidgetMenu(QDockWidget):
         volume_color_groupbox.setLayout(volume_color_layout)
         layout.addWidget(volume_color_groupbox)
 
-    def color_picker_skin(self):
-        color = QColorDialog.getColor()
-        color = color.getRgb()
-        self.render_data_service.set_skin_color(color)
-
-    def color_picker_bone(self):
-        color = QColorDialog.getColor()
-        color = color.getRgb()
-        self.render_data_service.set_bone_color(color)

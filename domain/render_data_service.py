@@ -43,25 +43,22 @@ class RenderDataService(QObject):
 
     def set_skin_color(self, skin_color):
         self.skin_color = skin_color
-        volumeColor = self.set_colors()
-        self.volume.GetProperty().SetColor(volumeColor)
-        self.volume.Update()
+        self.__set_colors()
         self.skin_color_changed.emit()
 
     def set_bone_color(self, bone_color):
         self.bone_color = bone_color
-        volumeColor = self.set_colors()
-        self.volume.GetProperty().SetColor(volumeColor)
-        self.volume.Update()
+        self.__set_colors()
         self.bone_color_changed.emit()
 
-    def set_colors(self):
+    def __set_colors(self):
         volumeColor = vtk.vtkColorTransferFunction()
         volumeColor.AddRGBPoint(0, 0.0, 0.0, 0.0)
         volumeColor.AddRGBPoint(500,  self.skin_color[0]/255, self.skin_color[1]/255, self.skin_color[2]/255)
         volumeColor.AddRGBPoint(1000, self.skin_color[0]/255, self.skin_color[1]/255, self.skin_color[2]/255)
         volumeColor.AddRGBPoint(1150, self.bone_color[0]/255, self.bone_color[1]/255, self.bone_color[2]/255)
-        return volumeColor
+        self.volume.GetProperty().SetColor(volumeColor)
+        self.volume.Update()
 
     def __setup_default_volume_parameters(self, image_reader):
             volume_mapper = vtk.vtkGPUVolumeRayCastMapper()
@@ -69,8 +66,6 @@ class RenderDataService(QObject):
 
             self.skin_color = [255, 127.5, 76.5]
             self.bone_color = [255, 255, 229.5]
-
-            volumeColor = self.set_colors()
 
             volumeScalarOpacity = vtk.vtkPiecewiseFunction()
             volumeScalarOpacity.AddPoint(0, 0.00)
@@ -84,7 +79,6 @@ class RenderDataService(QObject):
             volumeGradientOpacity.AddPoint(100, 1.0)
 
             volumeProperty = vtk.vtkVolumeProperty()
-            volumeProperty.SetColor(volumeColor)
             volumeProperty.SetScalarOpacity(volumeScalarOpacity)
             volumeProperty.SetGradientOpacity(volumeGradientOpacity)
             volumeProperty.SetInterpolationTypeToLinear()
@@ -95,3 +89,4 @@ class RenderDataService(QObject):
 
             self.volume.SetMapper(volume_mapper)
             self.volume.SetProperty(volumeProperty)
+            self.__set_colors()
