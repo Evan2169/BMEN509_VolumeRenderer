@@ -91,12 +91,12 @@ class DockWidgetMenu(QDockWidget):
         skin_opacity_slider.valueChanged.connect(change_skin_opacity)
 
     def __create_volume_color_view(self, layout, parent):
-        def color_picker_skin(self):
+        def color_picker_skin():
             color = QColorDialog.getColor()
             color = color.getRgb()
             self.render_data_service.set_skin_color(color)
 
-        def color_picker_bone(self):
+        def color_picker_bone():
             color = QColorDialog.getColor()
             color = color.getRgb()
             self.render_data_service.set_bone_color(color)

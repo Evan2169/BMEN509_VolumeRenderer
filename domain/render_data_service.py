@@ -16,6 +16,9 @@ class RenderDataService(QObject):
     def __init__(self):
         super().__init__()
         self.volume = vtk.vtkVolume()
+        
+        self.skin_color = [255, 127.5, 76.5]
+        self.bone_color = [255, 255, 229.5]
 
 
     def change_data(self, path_to_data, data_type):
@@ -63,9 +66,6 @@ class RenderDataService(QObject):
     def __setup_default_volume_parameters(self, image_reader):
             volume_mapper = vtk.vtkGPUVolumeRayCastMapper()
             volume_mapper.SetInputConnection(image_reader.GetOutputPort())
-
-            self.skin_color = [255, 127.5, 76.5]
-            self.bone_color = [255, 255, 229.5]
 
             volumeScalarOpacity = vtk.vtkPiecewiseFunction()
             volumeScalarOpacity.AddPoint(0, 0.00)
