@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import (
-    QColorDialog, QDialog, QDockWidget, 
-    QFileDialog, QGroupBox, QHBoxLayout, 
-    QLabel, QPushButton, QSlider, 
-    QVBoxLayout, QWidget
+    QCheckBox, QColorDialog, QDialog,  
+    QDockWidget, QFileDialog, QGroupBox, 
+    QHBoxLayout, QLabel, QPushButton, 
+    QSlider, QVBoxLayout, QWidget
 )
 from PyQt5.QtCore import QDir, Qt
 import vtk
@@ -12,14 +12,12 @@ from domain.render_data_service import DataType
 class DockWidgetMenu(QDockWidget):
     def __init__(self, main_window, render_data_service):
         super().__init__("Tools", main_window)
+        self.render_data_service = render_data_service 
+        
         main_window.addDockWidget(Qt.RightDockWidgetArea, self)
         self.setAllowedAreas(Qt.RightDockWidgetArea | Qt.LeftDockWidgetArea)
         self.__setupInternalContents()
         self.show()
-
-        self.render_data_service = render_data_service
-
-
 
     def __setupInternalContents(self):
         layout = QVBoxLayout()
@@ -28,6 +26,7 @@ class DockWidgetMenu(QDockWidget):
         self.__create_file_selection_view(layout, widget)
         self.__create_skin_opacity_view(layout, widget)
         self.__create_volume_color_view(layout, widget)
+        self.__create_toggle_misc_properties_view(layout, widget)
 
         widget.setLayout(layout)
         self.setWidget(widget)
@@ -78,7 +77,7 @@ class DockWidgetMenu(QDockWidget):
         skin_opacity_slider = QSlider(Qt.Horizontal)
         skin_opacity_slider.setMinimum(0)
         skin_opacity_slider.setMaximum(100)
-        skin_opacity_slider.setValue(15)
+        skin_opacity_slider.setValue(self.render_data_service.skin_opacity * 100)
         skin_opacity_layout = QHBoxLayout()
         skin_opacity_layout.addWidget(skin_opacity_label)
         skin_opacity_layout.addWidget(skin_opacity_slider)
@@ -114,3 +113,23 @@ class DockWidgetMenu(QDockWidget):
         volume_color_groupbox.setLayout(volume_color_layout)
         layout.addWidget(volume_color_groupbox)
 
+    def __create_toggle_misc_properties_view(self, layout, parent):
+        toggle_misc_properties_groupbox = QGroupBox("Toggle Misc. Properties", parent)
+        
+        toggle_shading_checkbox = QCheckBox("Shading", toggle_misc_properties_groupbox)
+        toggle_shading_checkbox.setCheckState(Qt.Checked if self.render_data_service.use_shading is True else Qt.Unchecked)
+        def toggle_shading(state):
+            self.render_data_service.enable_shading(state == Qt.Checked)
+        toggle_shading_checkbox.stateChanged.connect(toggle_shading)
+
+        toggle_gradient_opacity_checkbox = QCheckBox("Gradient Opacity", toggle_misc_properties_groupbox)
+        toggle_gradient_opacity_checkbox.setCheckState(Qt.Checked if self.render_data_service.use_gradient_opacity is True else Qt.Unchecked)
+        def toggle_gradient_opacity(state):
+            self.render_data_service.enable_gradient_opacity(state == Qt.Checked)
+        toggle_gradient_opacity_checkbox.stateChanged.connect(toggle_gradient_opacity)
+        
+        toggle_misc_properties_layout = QVBoxLayout()
+        toggle_misc_properties_layout.addWidget(toggle_shading_checkbox)
+        toggle_misc_properties_layout.addWidget(toggle_gradient_opacity_checkbox)
+        toggle_misc_properties_groupbox.setLayout(toggle_misc_properties_layout)
+        layout.addWidget(toggle_misc_properties_groupbox)

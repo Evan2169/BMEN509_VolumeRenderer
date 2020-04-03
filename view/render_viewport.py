@@ -18,6 +18,8 @@ class RenderViewport(QVTKRenderWindowInteractor):
         self.render_data_service.skin_opacity_changed.connect(self.__render)
         self.render_data_service.skin_color_changed.connect(self.__render)
         self.render_data_service.bone_color_changed.connect(self.__render)
+        self.render_data_service.shading_changed.connect(self.__render)
+        self.render_data_service.gradient_opactity_changed.connect(self.__render)
 
         self.renderer.GetActiveCamera().SetViewUp(0, 0, -1)
         self.renderer.GetActiveCamera().Azimuth(30.0)
