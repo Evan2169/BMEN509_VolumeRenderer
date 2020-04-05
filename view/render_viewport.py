@@ -8,10 +8,6 @@ class RenderViewport(QVTKRenderWindowInteractor):
         self.renderer = vtkRenderer()
         self.renderer.AddVolume(render_data_service.volume)
         self.GetRenderWindow().AddRenderer(self.renderer)
-        self.show()
-
-        self.GetRenderWindow().GetInteractor().Initialize()
-        self.GetRenderWindow().GetInteractor().Start()
 
         self.render_data_service = render_data_service
         self.render_data_service.volume_data_changed.connect(self.__update_volume)
@@ -20,10 +16,14 @@ class RenderViewport(QVTKRenderWindowInteractor):
         self.render_data_service.bone_color_changed.connect(self.__render)
         self.render_data_service.shading_changed.connect(self.__render)
         self.render_data_service.gradient_opactity_changed.connect(self.__render)
-
+        
         self.renderer.GetActiveCamera().SetViewUp(0, 0, -1)
         self.renderer.GetActiveCamera().Azimuth(30.0)
         self.renderer.GetActiveCamera().Elevation(30.0)
+        
+        self.Initialize()
+        self.Start()
+        self.show()
 
     def __update_volume(self):
         volume_centre = self.render_data_service.volume.GetCenter()
